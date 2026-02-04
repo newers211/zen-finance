@@ -1,61 +1,61 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-// Описание структуры хранилища
+// Определяем типы, чтобы TypeScript не ругался
+interface Transaction {
+  id: string;
+  amount: number;
+  type: 'income' | 'expense';
+  category: string;
+  created_at: string;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  type: 'income' | 'expense';
+  icon: string;
+}
+
 interface FinanceStore {
-  // Данные
-  transactions: any[];
-  categories: any[];
-  
-  // Настройки интерфейса
-  theme: 'light' | 'dark';
-  lang: 'ru' | 'en';
-  
-  // Логика валюты
+  transactions: Transaction[];
+  categories: Category[];
   currency: 'RUB' | 'USD';
   rate: number;
-
-  // Методы для обновления данных
-  setTransactions: (t: any[]) => void;
-  addTransaction: (t: any) => void;
-  setCategories: (c: any[]) => void;
+  lang: 'ru' | 'en';
+  theme: 'light' | 'dark';
   
-  // Методы для настроек
-  setTheme: (t: 'light' | 'dark') => void;
-  setLang: (l: 'ru' | 'en') => void;
-  setCurrency: (c: 'RUB' | 'USD') => void;
-  setRate: (r: number) => void;
+  setTransactions: (transactions: Transaction[]) => void;
+  addTransaction: (transaction: Transaction) => void;
+  setCategories: (categories: Category[]) => void;
+  setCurrency: (currency: 'RUB' | 'USD') => void;
+  setRate: (rate: number) => void;
+  setLang: (lang: 'ru' | 'en') => void;
+  setTheme: (theme: 'light' | 'dark') => void;
 }
 
 export const useFinanceStore = create<FinanceStore>()(
   persist(
     (set) => ({
-      // Начальные состояния
       transactions: [],
       categories: [],
-      theme: 'light',
-      lang: 'ru',
-      currency: 'RUB',
-      rate: 90, // Значение по умолчанию, обновится из API на главной
+      currency: 'RUB', // По умолчанию рубли
+      rate: 92,        // Дефолтный курс, пока не загрузится реальный
+      lang: 'ru',      // Язык по умолчанию
+      theme: 'light',  // Тема
 
-      // Реализация методов
-      setTransactions: (t) => set({ transactions: t }),
-      
-      // Добавляет новую транзакцию в начало списка (важно для мгновенного обновления истории)
-      addTransaction: (t) => set((state) => ({ 
-        transactions: [t, ...state.transactions] 
+      setTransactions: (transactions) => set({ transactions }),
+      addTransaction: (transaction) => set((state) => ({ 
+        transactions: [transaction, ...state.transactions] 
       })),
-
-      setCategories: (c) => set({ categories: c }),
-      
-      setTheme: (t) => set({ theme: t }),
-      setLang: (l) => set({ lang: l }),
-      
-      setCurrency: (c) => set({ currency: c }),
-      setRate: (r) => set({ rate: r }),
+      setCategories: (categories) => set({ categories }),
+      setCurrency: (currency) => set({ currency }),
+      setRate: (rate) => set({ rate }),
+      setLang: (lang) => set({ lang }),
+      setTheme: (theme) => set({ theme }),
     }),
-    { 
-      name: 'zen-finance-storage', // Ключ в localStorage
+    {
+      name: 'zen-finance-storage', // Имя ключа в LocalStorage
     }
   )
 );
