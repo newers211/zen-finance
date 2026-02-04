@@ -1,7 +1,6 @@
 'use client'
 import { motion } from 'framer-motion';
 
-// Добавляем интерфейс, чтобы TypeScript не ругался
 interface BalanceCardProps {
   amount: number;
   title: string;
@@ -9,9 +8,11 @@ interface BalanceCardProps {
   rate: number;
 }
 
-// ГЛАВНОЕ: export default должен быть здесь
+// ВОТ ЭТОГО НЕ ХВАТАЛО: export default
 export default function BalanceCard({ amount, title, currencySign, rate }: BalanceCardProps) {
-  const displayAmount = currencySign === '₽' ? amount : amount / rate;
+  // Защита от деления на ноль
+  const safeRate = rate || 1; 
+  const displayAmount = currencySign === '₽' ? amount : amount / safeRate;
 
   return (
     <motion.div 
