@@ -5,18 +5,18 @@ import { LogOut, Settings, Loader2, User, ArrowUpRight, ArrowDownLeft, DollarSig
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 
-// Локальные компоненты
-import BalanceCard from '@/components/BalanceCard';
-import AddTransaction from '@/components/AddTransaction';
-import Filters from '@/components/Filters';
-import SettingsModal from '@/components/SettingsModal';
+// ИСПРАВЛЕНИЕ: Используем жесткие пути (../) вместо алиасов (@/)
+import BalanceCard from '../components/BalanceCard';
+import AddTransaction from '../components/AddTransaction';
+import Filters from '../components/Filters';
+import SettingsModal from '../components/SettingsModal';
 
 // Глобальное состояние и база данных
-import { useFinanceStore } from '@/store/useStore';
-import { supabase } from '@/lib/supabase';
+import { useFinanceStore } from '../store/useStore';
+import { supabase } from '../lib/supabase';
 
-// Динамическая загрузка графика (чтобы не тормозил при старте)
-const Chart = dynamic(() => import('@/components/Chart'), { ssr: false });
+// Динамическая загрузка тоже через жесткий путь
+const Chart = dynamic(() => import('../components/Chart'), { ssr: false });
 
 const translations = {
   ru: { 
@@ -34,7 +34,6 @@ const translations = {
 export default function Home() {
   const router = useRouter();
   
-  // Достаем всё необходимое из глобального стора
   const { 
     transactions, setTransactions, 
     categories, setCategories, 
@@ -49,10 +48,9 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState('');
 
-  // Безопасный доступ к переводам
   const t = translations[lang === 'ru' ? 'ru' : 'en'];
 
-  // 1. ЗАГРУЗКА КУРСА ВАЛЮТ
+  // Загрузка курса
   useEffect(() => {
     const fetchRate = async () => {
       try {
@@ -63,13 +61,12 @@ export default function Home() {
         }
       } catch (err) {
         console.error("Ошибка загрузки курса:", err);
-        // Если API упал, курс не меняем (оставляем дефолтный из стора)
       }
     };
     fetchRate();
   }, [setRate]);
 
-  // 2. ФУНКЦИЯ ФОРМАТИРОВАНИЯ
+  // Форматирование
   const formatVal = (val: number) => {
     const converted = currency === 'RUB' ? val : val / rate;
     const sign = currency === 'RUB' ? '₽' : '$';
@@ -82,31 +79,24 @@ export default function Home() {
     };
   };
 
-  // 3. ТЕМНАЯ/СВЕТЛАЯ ТЕМА
+  // Тема
   useEffect(() => {
-    // Проверка на наличие window (чтобы не падало на сервере)
     if (typeof window !== 'undefined') {
       const root = window.document.documentElement;
-      if (theme === 'dark') {
-        root.classList.add('dark');
-      } else {
-        root.classList.remove('dark');
-      }
+      if (theme === 'dark') root.classList.add('dark');
+      else root.classList.remove('dark');
     }
   }, [theme]);
 
-  // 4. ИНИЦИАЛИЗАЦИЯ ДАННЫХ (AUTH + DB)
+  // Инициализация
   useEffect(() => {
     const initApp = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        
-        // Если нет сессии, редирект на логин
         if (!session) {
             router.push('/login');
             return;
         }
-        
         setUserEmail(session.user?.email || 'User');
         
         const [tx, cat] = await Promise.all([
@@ -125,7 +115,7 @@ export default function Home() {
     initApp();
   }, [router, setTransactions, setCategories]);
 
-  // 5. ФИЛЬТРАЦИЯ
+  // Фильтрация
   const filteredData = useMemo(() => {
     return transactions.filter((tr: any) => {
       const date = new Date(tr.created_at);
@@ -142,9 +132,8 @@ export default function Home() {
   const inc = filteredData.filter((i: any) => i.type === 'income').reduce((a: number, b: any) => a + Number(b.amount), 0);
   const exp = filteredData.filter((i: any) => i.type === 'expense').reduce((a: number, b: any) => a + Number(b.amount), 0);
 
-  // ЭКРАН ЗАГРУЗКИ
   if (loading) return (
-    <div className="h-screen flex items-center justify-center bg-[#F8F9FB] dark:bg-black transition-colors duration-500">
+    <div className="h-screen flex items-center justify-center bg-[#F8F9FB] dark:bg-black">
       <Loader2 className="animate-spin text-blue-600 w-10 h-10"/>
     </div>
   );
@@ -163,7 +152,6 @@ export default function Home() {
         </div>
         
         <div className="flex gap-2">
-          {/* КНОПКА ПЕРЕКЛЮЧЕНИЯ ВАЛЮТЫ */}
           <button 
             onClick={() => setCurrency(currency === 'RUB' ? 'USD' : 'RUB')}
             className="p-3 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800 shadow-sm active:scale-90 transition-all flex items-center gap-2"
@@ -182,7 +170,6 @@ export default function Home() {
       </header>
 
       <div className="max-w-2xl mx-auto space-y-8">
-        {/* Баланс */}
         <BalanceCard 
           amount={inc - exp} 
           title={t.balance} 
@@ -212,7 +199,6 @@ export default function Home() {
           </motion.div>
         </div>
 
-        {/* График */}
         <Chart 
           data={filteredData} 
           currencySign={currency === 'RUB' ? '₽' : '$'} 
@@ -262,7 +248,6 @@ export default function Home() {
         </section>
       </div>
 
-      {/* ИСПРАВЛЕННЫЙ МОДАЛ: Теперь рендерится условно */}
       {isSettingsOpen && (
         <SettingsModal onClose={() => setIsSettingsOpen(false)} />
       )}
