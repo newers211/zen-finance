@@ -1,11 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Принудительная обработка библиотек, которые конфликтуют с Turbopack
+  transpilePackages: ['recharts', 'react-is'],
+  
   typescript: {
-    // Позволяет деплоить, даже если есть ошибки в TypeScript
+    // Пропускаем ошибки типов при билде для ускорения запуска
     ignoreBuildErrors: true,
   },
   eslint: {
-    // Игнорирует предупреждения линтера при сборке
+    // Пропускаем проверки линтера при сборке
     ignoreDuringBuilds: true,
   },
 };
