@@ -1,37 +1,35 @@
 'use client'
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Moon, Sun } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useFinanceStore } from '@/store/useStore';
 
-export default function SettingsModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
-  const { theme, setTheme, lang, setLang } = useFinanceStore();
+export default function SettingsModal({ onClose }: { onClose: () => void }) {
+  const { lang, currency, setLang, setCurrency } = useFinanceStore();
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-black/40 backdrop-blur-md" />
-          <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }} className="relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[32px] p-8 border border-zinc-100 dark:border-zinc-800">
-            <div className="flex justify-between items-center mb-8"><h2 className="text-xl font-black">Settings</h2><button onClick={onClose}><X/></button></div>
-            <div className="space-y-6">
-              <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400 mb-2">Theme</p>
-                <div className="grid grid-cols-2 gap-2 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl">
-                  <button onClick={() => setTheme('light')} className={`flex items-center justify-center gap-2 py-2 rounded-lg ${theme === 'light' ? 'bg-white shadow-sm' : 'opacity-40'}`}><Sun size={14}/> Light</button>
-                  <button onClick={() => setTheme('dark')} className={`flex items-center justify-center gap-2 py-2 rounded-lg ${theme === 'dark' ? 'bg-zinc-700 text-white shadow-sm' : 'opacity-40'}`}><Moon size={14}/> Dark</button>
-                </div>
-              </div>
-              <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400 mb-2">Language</p>
-                <div className="grid grid-cols-2 gap-2 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl">
-                  <button onClick={() => setLang('ru')} className={`py-2 rounded-lg ${lang === 'ru' ? 'bg-white dark:bg-zinc-700 shadow-sm' : 'opacity-40'}`}>RU</button>
-                  <button onClick={() => setLang('en')} className={`py-2 rounded-lg ${lang === 'en' ? 'bg-white dark:bg-zinc-700 shadow-sm' : 'opacity-40'}`}>EN</button>
-                </div>
-              </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div className="bg-white dark:bg-zinc-900 w-full max-w-sm rounded-[30px] p-6 shadow-2xl relative">
+        <button onClick={onClose} className="absolute right-4 top-4 p-2 bg-zinc-100 dark:bg-zinc-800 rounded-full">
+          <X size={18} />
+        </button>
+        <h2 className="text-xl font-black mb-6">Settings</h2>
+        
+        <div className="space-y-4">
+          <div>
+            <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Language</label>
+            <div className="flex gap-2 mt-2">
+              <button onClick={() => setLang('ru')} className={`flex-1 py-3 rounded-xl font-bold ${lang === 'ru' ? 'bg-blue-600 text-white' : 'bg-zinc-100 dark:bg-zinc-800'}`}>RU</button>
+              <button onClick={() => setLang('en')} className={`flex-1 py-3 rounded-xl font-bold ${lang === 'en' ? 'bg-blue-600 text-white' : 'bg-zinc-100 dark:bg-zinc-800'}`}>EN</button>
             </div>
-          </motion.div>
+          </div>
+          <div>
+            <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Currency</label>
+            <div className="flex gap-2 mt-2">
+              <button onClick={() => setCurrency('RUB')} className={`flex-1 py-3 rounded-xl font-bold ${currency === 'RUB' ? 'bg-blue-600 text-white' : 'bg-zinc-100 dark:bg-zinc-800'}`}>RUB (₽)</button>
+              <button onClick={() => setCurrency('USD')} className={`flex-1 py-3 rounded-xl font-bold ${currency === 'USD' ? 'bg-blue-600 text-white' : 'bg-zinc-100 dark:bg-zinc-800'}`}>USD ($)</button>
+            </div>
+          </div>
         </div>
-      )}
-    </AnimatePresence>
+      </div>
+    </div>
   );
 }
